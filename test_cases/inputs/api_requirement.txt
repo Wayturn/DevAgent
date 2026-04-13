@@ -1,0 +1,19 @@
+Build a task management API for a small internal team.
+
+Requirements:
+- Users can create tasks
+- Users can update task status
+- Users can list their own tasks
+- Users can view task details
+- Each task has title, description, due_date, and status
+- Status values: todo, doing, done
+- Title is required
+- Only the task owner can update the task
+- Completed tasks should record completed_at
+
+Expected design direction:
+- RESTful API
+- clear request/response models
+- practical validation rules
+- service and repository responsibility split
+- suitable for a Python backend MVP
