@@ -1,9 +1,48 @@
 # Dev Agent CLI
 
-Dev Agent CLI 是一個輕量、可控的 AI developer agent CLI。
+Dev Agent CLI 是一個輕量、可控的 AI developer agent CLI。  
 這個專案的目標不是做成聊天機器人，而是以最小可行架構實作一個 developer agent harness。
 
 `CLI -> Orchestrator -> Tools -> LLM -> Output`
+
+## 快速開始
+
+如果你是第一次接觸這個專案，建議用下面 3 步快速體驗：
+
+### 1. 安裝
+
+```powershell
+python -m venv .venv
+.venv\Scripts\activate
+pip install -e .
+```
+
+### 2. 設定 `.env`
+
+在專案根目錄建立 `.env`：
+
+```env
+OPENAI_API_KEY=your_openai_api_key_here
+OPENAI_MODEL=gpt-4.1-mini
+```
+
+也可以直接參考：
+
+```text
+.env.example
+```
+
+### 3. 先跑最有感的 `fix`
+
+```powershell
+python -m dev_agent_cli.main fix .\test_cases\inputs\sample_service.py --goal "Reduce duplicated validation logic and improve readability" --trace
+```
+
+或直接用 PowerShell 快捷腳本：
+
+```powershell
+.\scripts\run_fix.ps1 -Trace
+```
 
 ## 為什麼做這個專案
 
@@ -79,6 +118,22 @@ Dev Agent CLI 的目標，是在不過度設計的前提下，實作一個具備
 - `gen-api`
   根據需求或文字內容產生 API 初稿
 
+## 快速體驗路徑
+
+如果你想最短時間感受到這個專案的價值，建議用下面順序：
+
+1. 先跑 `fix`
+2. 再看 `explain`
+3. 最後試 `gen-api`
+
+推薦指令：
+
+```powershell
+.\scripts\run_fix.ps1 -Trace
+.\scripts\run_explain.ps1 -Trace
+.\scripts\run_gen_api.ps1 -Trace
+```
+
 ## 目前進度
 
 ### 已完成
@@ -93,6 +148,7 @@ Dev Agent CLI 的目標，是在不過度設計的前提下，實作一個具備
 - `.env` 讀取支援
 - 基本單元測試
 - 手動測試素材與測試報告
+- PowerShell convenience scripts
 
 ### 下一步候選
 
@@ -107,6 +163,8 @@ Dev Agent CLI 的目標，是在不過度設計的前提下，實作一個具備
 src/
   README.md
   dev_agent_cli/
+scripts/
+  README.md
 tests/
   README.md
 test_cases/
@@ -152,6 +210,9 @@ python -m dev_agent_cli.main gen-api .\test_cases\inputs\api_requirement.txt --g
 
 - `src/README.md`
   核心程式結構與目前模組進度
+
+- `scripts/README.md`
+  PowerShell 便利腳本與 demo 用法
 
 - `tests/README.md`
   測試範圍與目前測試策略

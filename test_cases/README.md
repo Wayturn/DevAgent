@@ -41,6 +41,9 @@ test_cases/
 - `reports/test_report_2026-04-13.md`
   第一輪實測報告
 
+- `reports/test_report_2026-04-13_v3.md`
+  v3 狀態下重新執行的測試報告
+
 ### templates
 
 - `templates/test_log_template.md`
@@ -48,15 +51,15 @@ test_cases/
 
 ## 建議測試順序
 
-1. `explain` on `inputs/sample_service.py`
-2. `fix` on `inputs/sample_service.py`
+1. `fix` on `inputs/sample_service.py`
+2. `explain` on `inputs/sample_service.py`
 3. `gen-api` on `inputs/api_requirement.txt`
 
 ## 範例指令
 
 ```powershell
-python -m dev_agent_cli.main explain .\test_cases\inputs\sample_service.py --trace
 python -m dev_agent_cli.main fix .\test_cases\inputs\sample_service.py --goal "Reduce duplicated validation logic and improve readability" --trace
+python -m dev_agent_cli.main explain .\test_cases\inputs\sample_service.py --trace
 python -m dev_agent_cli.main gen-api .\test_cases\inputs\api_requirement.txt --goal "Design a clean RESTful backend API" --trace
 ```
 
@@ -70,4 +73,5 @@ python -m dev_agent_cli.main explain .\test_cases\inputs\sample_service.py --out
 
 - 已建立基礎手動測試素材
 - 已完成第一輪實測報告
+- 已完成 v3 重新測試報告
 - 後續可以持續累積不同 prompt 版本的比較報告
