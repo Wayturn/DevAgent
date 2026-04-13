@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import sys
+
 from dev_agent_cli.cli import parse_request
-from dev_agent_cli.config import AppConfig
+from dev_agent_cli.config import AppConfig, ConfigError
 from dev_agent_cli.llm import OpenAILlmClient
 from dev_agent_cli.orchestrator import AgentOrchestrator
 from dev_agent_cli.prompts import PromptRegistry
@@ -20,7 +22,11 @@ def _format_trace(result) -> str:
 
 def main(argv: list[str] | None = None) -> None:
     request = parse_request(argv)
-    config = AppConfig.from_env()
+    try:
+        config = AppConfig.from_env()
+    except ConfigError as exc:
+        print(f"設定錯誤:\n{exc}", file=sys.stderr)
+        raise SystemExit(1) from exc
     file_tool = FileTool()
 
     orchestrator = AgentOrchestrator(
