@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dev-agent-cli"
+version = "0.1.0"
+description = "A lightweight developer agent CLI with orchestrator and file tools."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "openai>=2.0.0",
+]
+
+[project.scripts]
+dev-agent = "dev_agent_cli.main:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
