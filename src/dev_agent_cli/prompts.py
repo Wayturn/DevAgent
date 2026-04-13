@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 from dev_agent_cli.models import CommandRequest, PromptPackage
+from dev_agent_cli.tools import FileTool
 
 
 BASE_SYSTEM_PROMPT = """You are a practical AI application engineer assistant.
@@ -19,6 +22,9 @@ When suggesting changes, explain trade-offs briefly.
 class PromptRegistry:
     """Maps CLI commands to explicit prompt templates."""
 
+    def __init__(self, file_tool: FileTool | None = None) -> None:
+        self._file_tool = file_tool or FileTool()
+
     def build(self, request: CommandRequest, file_content: str) -> PromptPackage:
         command_handlers = {
             "explain": self._build_explain_prompt,
@@ -27,11 +33,21 @@ class PromptRegistry:
         }
         return command_handlers[request.command](request, file_content)
 
+    def _build_repo_context(self, target_path: Path) -> str:
+        parent_dir = target_path.parent
+        try:
+            return self._file_tool.read_directory_summary(parent_dir)
+        except (FileNotFoundError, NotADirectoryError, PermissionError):
+            return f"Directory summary unavailable for: {parent_dir}"
+
     def _build_explain_prompt(self, request: CommandRequest, file_content: str) -> PromptPackage:
+        repo_context = self._build_repo_context(request.target_path)
         user_prompt = f"""Task: Explain this file in practical backend engineering language.
 
 Target file: {request.target_path}
 User goal: {request.goal or "Understand what the code does and how it is structured."}
+Target directory context:
+{repo_context}
 
 Please respond with:
 1. Purpose
@@ -43,32 +59,52 @@ File content:
 ```text
 {file_content}
 ```"""
-        return PromptPackage(system_prompt=BASE_SYSTEM_PROMPT, user_prompt=user_prompt)
+        return PromptPackage(
+            template_name="explain_v1",
+            system_prompt=BASE_SYSTEM_PROMPT,
+            user_prompt=user_prompt,
+        )
 
     def _build_fix_prompt(self, request: CommandRequest, file_content: str) -> PromptPackage:
+        repo_context = self._build_repo_context(request.target_path)
         user_prompt = f"""Task: Review this file and propose a practical fix.
 
 Target file: {request.target_path}
 User goal: {request.goal or "Identify problems and propose a safe, maintainable fix."}
+Target directory context:
+{repo_context}
 
-Please respond with:
-1. Problem summary
-2. Root cause
-3. Recommended fix
-4. Example revised code
-5. Trade-offs or follow-up checks
+Respond using exactly these stable markdown headings:
+## Problem Summary
+## Root Cause
+## Recommended Fix
+## Revised Code
+## Trade-offs / Notes
+
+Requirements:
+- Keep each section present even if the answer is short.
+- In `Revised Code`, provide one fenced code block.
+- Focus on practical, minimal, backend-friendly fixes.
+- Keep the output consistent and easy to parse.
 
 File content:
 ```text
 {file_content}
 ```"""
-        return PromptPackage(system_prompt=BASE_SYSTEM_PROMPT, user_prompt=user_prompt)
+        return PromptPackage(
+            template_name="fix_v2_structured_markdown",
+            system_prompt=BASE_SYSTEM_PROMPT,
+            user_prompt=user_prompt,
+        )
 
     def _build_gen_api_prompt(self, request: CommandRequest, file_content: str) -> PromptPackage:
+        repo_context = self._build_repo_context(request.target_path)
         user_prompt = f"""Task: Generate a practical backend API design from this input.
 
 Target file: {request.target_path}
 User goal: {request.goal or "Design a clean RESTful API and the minimum backend structure needed."}
+Target directory context:
+{repo_context}
 
 Please respond with:
 1. API purpose
@@ -84,4 +120,8 @@ File content:
 ```text
 {file_content}
 ```"""
-        return PromptPackage(system_prompt=BASE_SYSTEM_PROMPT, user_prompt=user_prompt)
+        return PromptPackage(
+            template_name="gen_api_v1",
+            system_prompt=BASE_SYSTEM_PROMPT,
+            user_prompt=user_prompt,
+        )

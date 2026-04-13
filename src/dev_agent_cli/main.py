@@ -13,16 +13,19 @@ def _format_trace(result) -> str:
     for index, step in enumerate(result.trace_steps, start=1):
         lines.append(f"{index}. [{step.stage}] {step.action}")
         lines.append(f"   -> {step.observation}")
+        for key, value in step.details.items():
+            lines.append(f"      {key}: {value}")
     return "\n".join(lines)
 
 
 def main(argv: list[str] | None = None) -> None:
     request = parse_request(argv)
     config = AppConfig.from_env()
+    file_tool = FileTool()
 
     orchestrator = AgentOrchestrator(
-        file_tool=FileTool(),
-        prompt_registry=PromptRegistry(),
+        file_tool=file_tool,
+        prompt_registry=PromptRegistry(file_tool=file_tool),
         llm_client=OpenAILlmClient(config),
     )
 

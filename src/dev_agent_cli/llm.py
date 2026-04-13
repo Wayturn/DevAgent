@@ -22,3 +22,7 @@ class OpenAILlmClient:
             ],
         )
         return response.output_text
+
+    @property
+    def model_name(self) -> str:
+        return self._model

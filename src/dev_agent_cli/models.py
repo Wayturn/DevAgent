@@ -19,6 +19,7 @@ class CommandRequest:
 
 @dataclass(slots=True)
 class PromptPackage:
+    template_name: str
     system_prompt: str
     user_prompt: str
 
@@ -28,6 +29,7 @@ class TraceStep:
     stage: str
     action: str
     observation: str
+    details: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass(slots=True)
