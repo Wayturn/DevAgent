@@ -19,9 +19,11 @@ class ParseRequestTests(unittest.TestCase):
         self.assertTrue(request.trace)
 
     def test_app_config_missing_api_key_shows_friendly_message(self) -> None:
-        with patch.dict("os.environ", {}, clear=True):
+        with TemporaryDirectory() as temp_dir:
+            missing_env_file = Path(temp_dir) / ".env"
+
             with self.assertRaises(ConfigError) as context:
-                AppConfig.from_env()
+                AppConfig.from_env(env={}, env_file=missing_env_file)
 
         message = str(context.exception)
         self.assertIn("缺少 OPENAI_API_KEY 設定", message)
@@ -59,7 +61,7 @@ class ParseRequestTests(unittest.TestCase):
     def test_main_exits_cleanly_when_api_key_is_missing(self) -> None:
         stderr = StringIO()
 
-        with patch.dict("os.environ", {}, clear=True):
+        with patch("dev_agent_cli.main.AppConfig.from_env", side_effect=ConfigError("缺少 OPENAI_API_KEY 設定")):
             with patch("sys.stderr", stderr):
                 with self.assertRaises(SystemExit) as context:
                     main(["explain", "demo.py"])

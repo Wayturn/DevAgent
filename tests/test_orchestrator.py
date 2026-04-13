@@ -49,6 +49,9 @@ class OrchestratorTests(unittest.TestCase):
             self.assertIn("command=explain", result.content)
             self.assertEqual(len(result.trace_steps), 4)
             self.assertEqual(result.trace_steps[0].details["target_extension"], ".py")
+            self.assertEqual(result.trace_steps[0].details["directory_tool_used"], "false")
+            self.assertEqual(result.trace_steps[1].details["directory_tool_used"], "true")
+            self.assertEqual(result.trace_steps[1].details["directory_files_listed"], "1")
             self.assertEqual(result.trace_steps[2].details["prompt_template"], "fake_template")
             self.assertEqual(result.trace_steps[3].details["model_name"], "fake-model")
 
@@ -87,12 +90,12 @@ class OrchestratorTests(unittest.TestCase):
                 target.read_text(encoding="utf-8"),
             )
 
-            self.assertEqual(prompt.template_name, "fix_v2_structured_markdown")
+            self.assertEqual(prompt.template_name, "fix_v3_structured_markdown")
             self.assertIn("## Problem Summary", prompt.user_prompt)
             self.assertIn("## Root Cause", prompt.user_prompt)
             self.assertIn("## Recommended Fix", prompt.user_prompt)
             self.assertIn("## Revised Code", prompt.user_prompt)
-            self.assertIn("## Trade-offs / Notes", prompt.user_prompt)
+            self.assertIn("## Follow-up Checks", prompt.user_prompt)
 
     def test_file_tool_directory_summary_lists_project_files(self) -> None:
         with TemporaryDirectory() as temp_dir:
@@ -106,6 +109,22 @@ class OrchestratorTests(unittest.TestCase):
             self.assertIn("Directory summary for:", summary)
             self.assertIn("app\\service.py", summary)
             self.assertIn("README.md", summary)
+
+    def test_file_tool_list_files_supports_extension_filter_and_depth(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            (root / "app").mkdir()
+            (root / "app" / "service.py").write_text("pass", encoding="utf-8")
+            (root / "app" / "nested").mkdir()
+            (root / "app" / "nested" / "deep.py").write_text("pass", encoding="utf-8")
+            (root / "README.md").write_text("# demo", encoding="utf-8")
+
+            files = FileTool().list_files(root, extensions={".py"}, max_depth=1)
+            relative_paths = {str(path.relative_to(root)) for path in files}
+
+            self.assertIn("app\\service.py", relative_paths)
+            self.assertNotIn("README.md", relative_paths)
+            self.assertNotIn("app\\nested\\deep.py", relative_paths)
 
 
 if __name__ == "__main__":

@@ -19,19 +19,57 @@ class FileTool:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content, encoding="utf-8")
 
-    def list_files(self, directory: Path, limit: int = 20) -> list[Path]:
+    def list_files(
+        self,
+        directory: Path,
+        limit: int = 20,
+        extensions: set[str] | None = None,
+        max_depth: int | None = None,
+    ) -> list[Path]:
         if not directory.exists():
             raise FileNotFoundError(f"Directory not found: {directory}")
 
         if not directory.is_dir():
             raise NotADirectoryError(f"Expected a directory but got a file: {directory}")
 
-        files = [path for path in directory.rglob("*") if path.is_file()]
+        normalized_extensions = None
+        if extensions:
+            normalized_extensions = {
+                extension if extension.startswith(".") else f".{extension}"
+                for extension in extensions
+            }
+
+        files: list[Path] = []
+        for path in directory.rglob("*"):
+            if not path.is_file():
+                continue
+
+            relative_path = path.relative_to(directory)
+            depth = len(relative_path.parts) - 1
+            if max_depth is not None and depth > max_depth:
+                continue
+
+            if normalized_extensions and path.suffix not in normalized_extensions:
+                continue
+
+            files.append(path)
+
         files.sort()
         return files[:limit]
 
-    def read_directory_summary(self, directory: Path, limit: int = 20) -> str:
-        files = self.list_files(directory, limit=limit)
+    def read_directory_summary(
+        self,
+        directory: Path,
+        limit: int = 20,
+        extensions: set[str] | None = None,
+        max_depth: int | None = 1,
+    ) -> str:
+        files = self.list_files(
+            directory,
+            limit=limit,
+            extensions=extensions,
+            max_depth=max_depth,
+        )
         if not files:
             return "Directory summary: no files found."
 

@@ -36,7 +36,11 @@ class PromptRegistry:
     def _build_repo_context(self, target_path: Path) -> str:
         parent_dir = target_path.parent
         try:
-            return self._file_tool.read_directory_summary(parent_dir)
+            return self._file_tool.read_directory_summary(
+                parent_dir,
+                limit=12,
+                max_depth=1,
+            )
         except (FileNotFoundError, NotADirectoryError, PermissionError):
             return f"Directory summary unavailable for: {parent_dir}"
 
@@ -74,25 +78,26 @@ User goal: {request.goal or "Identify problems and propose a safe, maintainable 
 Target directory context:
 {repo_context}
 
-Respond using exactly these stable markdown headings:
+        Respond using exactly these stable markdown headings:
 ## Problem Summary
 ## Root Cause
 ## Recommended Fix
 ## Revised Code
-## Trade-offs / Notes
+## Follow-up Checks
 
 Requirements:
 - Keep each section present even if the answer is short.
 - In `Revised Code`, provide one fenced code block.
 - Focus on practical, minimal, backend-friendly fixes.
 - Keep the output consistent and easy to parse.
+- In `Follow-up Checks`, list validation items, regression risks, or things the developer should verify after applying the fix.
 
 File content:
 ```text
 {file_content}
 ```"""
         return PromptPackage(
-            template_name="fix_v2_structured_markdown",
+            template_name="fix_v3_structured_markdown",
             system_prompt=BASE_SYSTEM_PROMPT,
             user_prompt=user_prompt,
         )

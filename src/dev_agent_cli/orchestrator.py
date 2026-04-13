@@ -41,17 +41,20 @@ class AgentOrchestrator:
                     "target_extension": target_extension,
                     "target_directory": str(target_directory),
                     "input_chars": str(len(file_content)),
+                    "directory_tool_used": "false",
                 },
             )
         )
 
-        directory_summary = self._safe_directory_summary(target_directory)
+        directory_summary, directory_file_count = self._safe_directory_summary(target_directory)
         trace_steps.append(
             TraceStep(
                 stage="observe",
                 action=f"Inspect directory: {target_directory}",
                 observation="Collected lightweight directory summary for repo context.",
                 details={
+                    "directory_tool_used": "true",
+                    "directory_files_listed": str(directory_file_count),
                     "directory_summary_chars": str(len(directory_summary)),
                     "directory_summary_preview": directory_summary[:120].replace("\n", " "),
                 },
@@ -107,8 +110,10 @@ class AgentOrchestrator:
             trace_steps=trace_steps,
         )
 
-    def _safe_directory_summary(self, directory: Path) -> str:
+    def _safe_directory_summary(self, directory: Path) -> tuple[str, int]:
         try:
-            return self._file_tool.read_directory_summary(directory)
+            files = self._file_tool.list_files(directory, limit=12, max_depth=1)
+            summary = self._file_tool.read_directory_summary(directory, limit=12, max_depth=1)
+            return summary, len(files)
         except (FileNotFoundError, NotADirectoryError, PermissionError):
-            return f"Directory summary unavailable for: {directory}"
+            return f"Directory summary unavailable for: {directory}", 0
