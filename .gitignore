@@ -1,7 +1,18 @@
+# Python cache and build artifacts
 __pycache__/
 *.py[cod]
 *.egg-info/
-.venv/
-dist/
 build/
+dist/
 .pytest_cache/
+
+# Virtual environments
+.venv/
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# Local command outputs
+out/

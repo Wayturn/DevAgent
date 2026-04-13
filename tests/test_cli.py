@@ -1,6 +1,7 @@
 import unittest
 from io import StringIO
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 from dev_agent_cli.cli import parse_request
@@ -23,8 +24,37 @@ class ParseRequestTests(unittest.TestCase):
                 AppConfig.from_env()
 
         message = str(context.exception)
-        self.assertIn("缺少 OPENAI_API_KEY 環境變數", message)
-        self.assertIn('$env:OPENAI_API_KEY="你的 OpenAI API Key"', message)
+        self.assertIn("缺少 OPENAI_API_KEY 設定", message)
+        self.assertIn("在專案根目錄建立 .env 檔案", message)
+
+    def test_app_config_loads_from_dotenv(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            env_file = Path(temp_dir) / ".env"
+            env_file.write_text(
+                "OPENAI_API_KEY=test-key\nOPENAI_MODEL=gpt-4.1\n",
+                encoding="utf-8",
+            )
+
+            config = AppConfig.from_env(env={}, env_file=env_file)
+
+        self.assertEqual(config.openai_api_key, "test-key")
+        self.assertEqual(config.openai_model, "gpt-4.1")
+
+    def test_environment_variables_override_dotenv(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            env_file = Path(temp_dir) / ".env"
+            env_file.write_text(
+                "OPENAI_API_KEY=file-key\nOPENAI_MODEL=file-model\n",
+                encoding="utf-8",
+            )
+
+            config = AppConfig.from_env(
+                env={"OPENAI_API_KEY": "env-key", "OPENAI_MODEL": "env-model"},
+                env_file=env_file,
+            )
+
+        self.assertEqual(config.openai_api_key, "env-key")
+        self.assertEqual(config.openai_model, "env-model")
 
     def test_main_exits_cleanly_when_api_key_is_missing(self) -> None:
         stderr = StringIO()
