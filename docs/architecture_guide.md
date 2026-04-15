@@ -378,3 +378,338 @@ flowchart LR
 3. `PromptRegistry` 和 `llm.py` 最大差別是什麼？
 
 如果你能用自己的話回答出來，而且答案越來越穩，代表你開始真的理解這個專案，而不是只會看檔名。
+
+---
+
+## 17. 第三輪：工程化支撐層
+
+第三輪的重點不是流程本身，而是回答：
+
+> 這個專案為什麼開始像一個工程專案，而不只是能跑的 demo？
+
+答案主要在三塊：
+
+- `models.py`
+- `config.py`
+- `tests/`
+
+你可以把這一層想成：
+
+- `models.py`：讓模組之間有共同語言
+- `config.py`：讓程式能在不同環境穩定啟動
+- `tests/`：讓你敢改東西，而且知道現在沒壞
+
+### 17.1 工程化支撐圖
+
+```mermaid
+flowchart TD
+    A["使用者輸入命令"] --> B["cli.py"]
+    B --> C["CommandRequest"]
+    C --> D["orchestrator.py"]
+
+    D --> E["PromptPackage"]
+    D --> F["AgentResult"]
+    D --> G["TraceStep"]
+
+    H["config.py"] --> I["AppConfig"]
+    I --> J["OpenAILlmClient"]
+
+    K["tests/"] --> L["驗證 CLI 行為"]
+    K --> M["驗證設定載入"]
+    K --> N["驗證 orchestrator 流程"]
+    K --> O["驗證 prompt / tool 邊界"]
+```
+
+---
+
+## 18. `models.py`：系統的共同語言
+
+`models.py` 的核心價值不是功能很多，而是：
+
+> 讓不同模組之間講同一種語言。
+
+如果沒有這層，很容易變成：
+
+- CLI 回傳一種格式
+- Orchestrator 吃另一種格式
+- PromptRegistry 再吃另一種格式
+- Trace 又是自由格式
+
+最後每個模組都在猜彼此的資料長什麼樣。
+
+### 18.1 `CommandRequest`
+
+```python
+@dataclass(slots=True)
+class CommandRequest:
+    command: CommandName
+    target_path: Path
+    goal: str | None = None
+    output_path: Path | None = None
+    trace: bool = False
+```
+
+它代表：
+
+> 使用者這次到底想做什麼。
+
+它是整個工作流的輸入模型，類似 backend 裡的 request DTO / command object。
+
+### 18.2 `PromptPackage`
+
+```python
+@dataclass(slots=True)
+class PromptPackage:
+    template_name: str
+    system_prompt: str
+    user_prompt: str
+```
+
+它代表：
+
+> prompt 不是隨便拼的一大段字串，而是一個正式的結構化資料。
+
+它的工程價值：
+
+- 可以知道用了哪個 template
+- 可以 trace
+- 可以版本化
+- 可以測試 prompt 結構
+
+### 18.3 `TraceStep`
+
+```python
+@dataclass(slots=True)
+class TraceStep:
+    stage: str
+    action: str
+    observation: str
+    details: dict[str, str] = field(default_factory=dict)
+```
+
+它代表：
+
+> trace 不是幾行 print，而是一個有欄位的觀測事件。
+
+所以之後如果要：
+
+- 改成 JSON
+- 存成檔案
+- 做 UI 顯示
+
+都會比較容易。
+
+### 18.4 `AgentResult`
+
+```python
+@dataclass(slots=True)
+class AgentResult:
+    command: CommandName
+    target_path: Path
+    content: str
+    trace_steps: list[TraceStep] = field(default_factory=list)
+```
+
+它代表：
+
+> Orchestrator 回傳的不是裸字串，而是一個正式結果物件。
+
+這讓 `main.py` 不只知道輸出內容，還知道：
+
+- command 是什麼
+- target 是哪個檔案
+- trace 有哪些步驟
+
+### 18.5 `models.py` 的一句話總結
+
+> `models.py` 讓各模組之間用穩定資料結構互動，而不是散亂地傳字串或 dict。
+
+---
+
+## 19. `config.py`：讓程式能穩定啟動
+
+`config.py` 的重點不是炫技，而是處理真實開發問題：
+
+- API key 放哪裡？
+- 本地和部署環境怎麼共存？
+- 缺設定時要怎麼提示？
+
+### 19.1 `ConfigError`
+
+```python
+class ConfigError(ValueError):
+    """Raised when required application configuration is missing."""
+```
+
+這表示：
+
+- 設定錯誤被當成一種正式錯誤類型
+- 而不是隨便丟一個 generic exception
+
+### 19.2 `_parse_dotenv()`
+
+這個函式負責：
+
+- 讀 `.env`
+- 忽略空行與註解
+- 將 `KEY=VALUE` 解析成字典
+
+這樣 `.env` 的處理邏輯就不會散落在各個檔案。
+
+### 19.3 `AppConfig`
+
+```python
+@dataclass(slots=True)
+class AppConfig:
+    openai_api_key: str
+    openai_model: str = "gpt-4.1-mini"
+```
+
+它代表：
+
+> 程式真正需要的設定集合。
+
+這跟 `CommandRequest` 很像：
+
+- `CommandRequest` 整理使用者意圖
+- `AppConfig` 整理執行環境設定
+
+### 19.4 `from_env()` 的優先順序
+
+目前的設計是：
+
+```text
+runtime environment -> .env -> default
+```
+
+也就是：
+
+1. 真正環境變數優先
+2. `.env` 次之
+3. 最後才用預設值
+
+這個設計的好處：
+
+- 本地開發方便
+- 部署也不被 `.env` 綁死
+- 開源專案的體驗比較好
+
+### 19.5 `config.py` 的一句話總結
+
+> `config.py` 把環境設定變成正式系統元件，而不是讓專案只在某台機器上剛好能跑。
+
+---
+
+## 20. `tests/`：讓你敢改東西
+
+對這種 developer tooling / agent CLI 專案來說，測試很重要，因為它不是單純頁面或 CRUD：
+
+- prompt 會改
+- trace 會改
+- config 會改
+- tool 行為會改
+
+如果沒有測試，之後每次調 prompt 或改 trace 都很容易不小心壞掉。
+
+### 20.1 `tests/test_cli.py`
+
+這個檔案主要測：
+
+- CLI parsing
+- `.env` 載入
+- 環境變數覆蓋 `.env`
+- 缺少 API key 時的友善錯誤訊息
+- `main()` 在設定缺失時能否乾淨退出
+
+它在驗證的是：
+
+> 使用者輸入與執行環境設定，能不能穩定地轉成系統可用狀態。
+
+### 20.2 `tests/test_orchestrator.py`
+
+這個檔案主要測：
+
+- orchestrator 基本流程
+- trace 欄位是否存在
+- `fix` prompt heading 是否穩定
+- `FileTool` 的 directory summary 行為
+- `list_files()` 的 extension filter / depth limit
+
+它在驗證的是：
+
+> 這個專案最重要的流程邊界和工具邊界，有沒有按照預期工作。
+
+### 20.3 為什麼 tests 代表工程化？
+
+因為它代表你不只是想讓專案今天跑成功一次，而是希望它能：
+
+- 安全演進
+- 容易重構
+- 修改後可以快速驗證
+
+### 20.4 `tests/` 的一句話總結
+
+> `tests/` 讓這個專案不只是 demo，而是可以持續演進的工程作品。
+
+---
+
+## 21. 這一輪最重要的 3 件事
+
+### 21.1 `models.py`
+
+讓模組之間有共同語言，而不是散亂傳資料。
+
+### 21.2 `config.py`
+
+讓專案能在不同環境下穩定啟動，而不是只在你電腦上剛好能跑。
+
+### 21.3 `tests/`
+
+讓你敢改東西，而且改完知道有沒有壞。
+
+---
+
+## 22. 三輪合起來後，這個專案為什麼比較像工程系統？
+
+### 第一輪
+
+- 有清楚流程控制
+- 有 orchestrator
+
+### 第二輪
+
+- 有 command abstraction
+- 有 tool layer
+- 有 bounded repo-aware context
+
+### 第三輪
+
+- 有正式資料模型
+- 有設定管理
+- 有單元測試
+
+所以現在它比較像：
+
+> 一個有邊界、有流程、有資料結構、有設定管理、有測試保護的輕量工程系統。
+
+---
+
+## 23. 第三輪的短版講法
+
+你之後可以用這段話來描述這一層：
+
+- `models.py` 定義系統內部共用的資料結構，讓模組之間互動更穩定。
+- `config.py` 處理 `.env` 和環境變數讀取，讓專案本地開發和部署情境都比較好管理。
+- `tests/` 驗證 CLI、config、orchestrator、prompt 結構和 file tools，讓這個專案可以持續演進，而不是只靠手動測試。
+
+---
+
+## 24. 第三輪檢查題
+
+你可以用下面 3 題檢查自己：
+
+1. 為什麼 `PromptPackage` 和 `AgentResult` 這種 model 對這個專案有價值？
+2. 為什麼 `.env` + 環境變數覆蓋的設計，比只支援其中一種更好？
+3. 為什麼這個專案要測 `fix` 的 heading 結構，而不是只測它有沒有輸出文字？
+
+如果你能用自己的話回答出來，而且答案越來越穩，代表你已經從「看得懂 code」進到「開始理解設計」。
