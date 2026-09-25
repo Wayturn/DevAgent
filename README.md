@@ -1,7 +1,7 @@
 # Dev Agent CLI
 
-Dev Agent CLI 是一個輕量、可控的 AI developer agent CLI。  
-這個專案的目標不是做成聊天機器人，而是以最小可行架構實作一個 developer agent harness。
+Dev Agent CLI 是一個輕量、可檢視的 AI-assisted developer workflow / agent harness 實驗。  
+這個專案的目標不是做成聊天機器人或全自動 coding agent，而是用最小可行架構探索 command、tool、prompt、orchestration 與 trace 之間的清楚邊界，讓模型執行流程更容易被理解、檢查與驗證。
 
 `CLI -> Orchestrator -> Tools -> LLM -> Output`
 
@@ -91,7 +91,7 @@ Dev Agent CLI 的目標，是在不過度設計的前提下，實作一個具備
   目前支援 `explain`、`fix`、`gen-api`，每個 command 都有對應的 prompt 設計與用途定位。
 
 - **Lightweight tool layer**
-  工具層以安全的檔案操作與目錄摘要為主，避免過早加入高風險能力。
+  工具層目前只提供受限的檔案操作與目錄摘要，不包含 shell execution 等高風險能力；這是縮小工具邊界，不代表完整 security sandbox。
 
 - **Structured output + telemetry**
   `fix` 已具備較穩定的結構化輸出，同時保留 trace / telemetry，讓執行流程更容易觀察與 debug。
