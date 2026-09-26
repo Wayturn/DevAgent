@@ -31,11 +31,13 @@ src/dev_agent_cli/
   共享資料模型，例如 `CommandRequest`、`PromptPackage`、`TraceStep`
 
 - `tools.py`
-  目前的安全工具能力，包含：
+  目前提供的 bounded file operations，包含：
   - 讀檔
   - 寫檔
   - 列出目錄檔案
   - 產生目錄摘要
+
+  這限制的是可用的操作種類，不提供檔案路徑授權或完整 security sandbox。
 
 - `prompts.py`
   command-specific prompt template

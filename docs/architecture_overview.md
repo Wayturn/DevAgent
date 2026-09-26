@@ -13,7 +13,7 @@
 
 ## 1. 專案定位
 
-DevAgent 是一個 **analysis-first、lightweight developer agent CLI**。
+DevAgent 是一個輕量、可檢視的 AI-assisted developer workflow / agent harness 學習實驗。它把 command、orchestration、tool、prompt 與 model call 的責任邊界攤開；trace 讓執行流程可檢視，測試與手動案例驗證目前涵蓋的行為。這是學習與作品集專案，不是 production-ready 工具或完整檔案路徑安全隔離。
 
 它的核心流程是：
 
@@ -29,7 +29,7 @@ DevAgent 是一個 **analysis-first、lightweight developer agent CLI**。
 
 - command abstraction
 - orchestrator-controlled workflow
-- safe file tools
+- bounded file operations（不含 shell execution，也不是檔案路徑安全隔離）
 - structured output
 - trace / telemetry
 
@@ -130,7 +130,7 @@ DevAgent 則多了幾層明確的工程邊界：
 
 因此更精確的說法是：
 
-> DevAgent 是一個輕量、可控、偏分析型的 developer agent harness。
+> DevAgent 是一個輕量、可檢視的 AI-assisted developer workflow / agent harness 學習實驗；trace 讓流程可檢視，測試與手動案例驗證目前涵蓋的行為。
 
 ---
 

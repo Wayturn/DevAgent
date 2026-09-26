@@ -13,7 +13,7 @@
 
 ## 1. 專案一句話定位
 
-DevAgent 是一個 **analysis-first、lightweight developer agent CLI**。
+DevAgent 是一個輕量、可檢視的 AI-assisted developer workflow / agent harness 學習實驗。它把 command、orchestration、tool、prompt 與 model call 的責任邊界攤開；trace 讓執行流程可檢視，測試與手動案例驗證目前涵蓋的行為。這是學習與作品集專案，不是 production-ready 工具或完整檔案路徑安全隔離。
 
 它的核心流程是：
 
@@ -292,7 +292,7 @@ sequenceDiagram
 
 所以更準確的說法是：
 
-> 這是一個 analysis-first、lightweight developer agent harness，而不是只有 prompt in / answer out 的小工具。
+> 這是一個輕量、可檢視的 AI-assisted developer workflow / agent harness 學習實驗；trace 呈現執行流程，測試與手動案例驗證目前涵蓋的行為。
 
 ---
 
@@ -328,11 +328,11 @@ flowchart LR
 
 ## 14. 你目前最該會講的 5 句話
 
-1. 這個專案是 analysis-first 的 developer agent CLI。
+1. 這個專案是輕量、可檢視的 AI-assisted developer workflow / agent harness 學習實驗。
 2. 它的核心流程是 `CLI -> Orchestrator -> Tools -> LLM -> Output`。
 3. `Orchestrator` 的責任是控制流程，不是做所有事情。
 4. `PromptRegistry` 讓不同 command 有明確的 prompt abstraction。
-5. `FileTool` 目前刻意保持安全，只提供 bounded file operations。
+5. `FileTool` 目前只提供 bounded file operations；限制的是操作種類，不代表檔案路徑安全隔離。
 
 如果這 5 句你能自然講出來，代表你對整個專案已經有不錯的理解。
 

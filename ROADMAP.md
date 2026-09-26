@@ -81,11 +81,13 @@
 
 Dev Agent CLI 目前的定位是：
 
-**a lightweight, analysis-first, learning-oriented developer agent CLI**
+**a lightweight, inspectable AI-assisted developer workflow / agent harness experiment**
+
+這是學習與作品集專案，不是 production-ready 工具。它把 command、orchestration、tool、prompt 與 model call 的責任邊界攤開；trace 讓執行流程可檢視，測試與手動案例驗證目前涵蓋的行為。這些描述不代表完整的檔案路徑安全隔離。
 
 這代表它現在的核心價值是：
 
-- 清楚的架構敘事
-- 可控的 developer tooling workflow
-- 可觀測的 trace / telemetry
-- 適合作為 AI application / developer tooling 方向的學習型作品集專案
+- 清楚的 command、orchestration、tool、prompt 與 model call 邊界
+- 可檢視的執行流程與 trace / telemetry
+- 由測試與手動案例驗證目前涵蓋的行為
+- 以 AI application / developer tooling 為主題的學習與作品集實作

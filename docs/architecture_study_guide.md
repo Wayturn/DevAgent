@@ -17,7 +17,7 @@
 
 這個專案不是聊天機器人，而是：
 
-> 一個把使用者意圖轉成受控 AI workflow 的輕量 developer agent CLI。
+> 一個輕量、可檢視的 AI-assisted developer workflow / agent harness 學習實驗：責任邊界清楚，trace 呈現流程，測試與手動案例驗證目前涵蓋的行為。
 
 你可以先把主要模組記成這樣：
 
@@ -284,7 +284,7 @@ runtime environment -> .env -> default
 
 因此更準確的定位是：
 
-> 一個 analysis-first、lightweight developer agent harness。
+> 一個輕量、可檢視的 AI-assisted developer workflow / agent harness 學習實驗；trace 呈現執行流程，測試與手動案例驗證目前涵蓋的行為。
 
 ---
 
@@ -318,11 +318,11 @@ flowchart LR
 
 ## 9. 你目前最該會講的 5 句話
 
-1. 這個專案是 analysis-first 的 developer agent CLI。
+1. 這個專案是輕量、可檢視的 AI-assisted developer workflow / agent harness 學習實驗。
 2. 它的核心流程是 `CLI -> Orchestrator -> Tools -> LLM -> Output`。
 3. `Orchestrator` 的責任是控制流程，不是做所有事情。
 4. `PromptRegistry` 讓不同 command 有明確的 prompt abstraction。
-5. `FileTool` 目前刻意保持安全，只提供 bounded file operations。
+5. `FileTool` 目前只提供 bounded file operations；限制的是操作種類，不代表檔案路徑安全隔離。
 
 ---
 
@@ -383,7 +383,7 @@ flowchart LR
 
 如果你現在只想先記住最精簡的版本，記下面這段就好：
 
-> DevAgent 是一個 analysis-first 的 developer agent CLI。  
+> DevAgent 是一個輕量、可檢視的 AI-assisted developer workflow / agent harness 學習實驗。trace 呈現執行流程，測試與手動案例驗證目前涵蓋的行為。
 > `cli.py` 接收命令，`main.py` 組裝系統，`orchestrator.py` 控制流程，`tools.py` 提供受控能力，`prompts.py` 管理不同 command 的 prompt，`llm.py` 封裝模型呼叫，`models.py` 定義共同資料結構，`config.py` 負責環境設定，`tests/` 則讓整個專案能安全演進。
 
 ---

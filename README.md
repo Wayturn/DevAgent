@@ -1,7 +1,7 @@
 # Dev Agent CLI
 
-Dev Agent CLI 是一個輕量、可檢視的 AI-assisted developer workflow / agent harness 實驗。  
-這個專案的目標不是做成聊天機器人或全自動 coding agent，而是用最小可行架構探索 command、tool、prompt、orchestration 與 trace 之間的清楚邊界，讓模型執行流程更容易被理解、檢查與驗證。
+Dev Agent CLI 是一個輕量、可檢視的 AI-assisted developer workflow / agent harness 學習實驗。
+它把 command、orchestration、tool、prompt 與 model call 的責任邊界攤開；trace 讓執行流程可檢視，測試與手動案例則驗證目前涵蓋的行為。這是學習與作品集專案，不是 production-ready 工具或完整 security sandbox。
 
 `CLI -> Orchestrator -> Tools -> LLM -> Output`
 
@@ -50,7 +50,7 @@ python -m dev_agent_cli.main fix .\test_cases\inputs\sample_service.py --goal "R
 
 很多 AI CLI 範例本質上只是把檔案內容直接丟進 prompt，再把模型輸出原樣回傳。這種方式雖然能快速做出 demo，但通常很難演進成可維護、可觀測、可逐步擴充的工程工具。
 
-Dev Agent CLI 的目標，是在不過度設計的前提下，實作一個具備基本 agent harness 特徵的開發者工具：有明確的 command abstraction、有 orchestrator 控制流程、有受限的 tools、有 prompt layer，也保留 trace / telemetry 與後續擴充空間。
+Dev Agent CLI 用小而清楚的實作，探索 AI-assisted developer workflow 的基本邊界：command abstraction、orchestrator 控制流程、受限的 tools、prompt layer 與 trace / telemetry。
 
 ## 核心設計理念
 
@@ -63,23 +63,24 @@ Dev Agent CLI 的目標，是在不過度設計的前提下，實作一個具備
 - **工程可讀性優先**
   模組切分維持輕量，讓人能快速理解 CLI、Orchestrator、Tools、LLM 之間的責任分工。
 
-- **逐步演進成 developer agent harness**
-  目前先從單步、受控、低風險的工作流開始，未來再視需要往更多工具能力與更完整的 agent loop 演進。
+- **讓流程可檢視、行為可驗證**
+  目前先維持單步、受控的工作流；是否增加能力，應由實際驗證結果決定，不預設擴成完整 agent loop。
 
 ## 這個專案是什麼 / 不是什麼
 
 ### 這個專案是什麼
 
-- 一個輕量、可控的 CLI-based AI developer agent MVP
-- 一個以 developer tooling 為方向的 agent harness 實作
+- 一個輕量、可檢視的 AI-assisted developer workflow / agent harness 實驗
+- 一個用來理解 command、tool、prompt、orchestration 邊界的學習專案
 - 一個能展示 prompt abstraction、tool usage、trace visibility 的作品集專案
-- 一個可持續增量演進的 AI application engineering 練習場
+- 一個 AI application engineering 練習場
 
 ### 這個專案不是什麼
 
 - 不是單純的聊天機器人包裝
 - 不是大型 framework 或多代理系統
 - 不是具備 shell execution、patch apply、autonomous loop 的完整 agent 平台
+- 不是 production-ready 開發工具，也不提供完整的檔案路徑安全隔離
 - 不是以炫技為主的架構展示，而是偏向實作可讀、可驗證、可說明的工程作品
 
 ## 專案亮點摘要
@@ -91,7 +92,7 @@ Dev Agent CLI 的目標，是在不過度設計的前提下，實作一個具備
   目前支援 `explain`、`fix`、`gen-api`，每個 command 都有對應的 prompt 設計與用途定位。
 
 - **Lightweight tool layer**
-  工具層目前只提供受限的檔案操作與目錄摘要，不包含 shell execution 等高風險能力；這是縮小工具邊界，不代表完整 security sandbox。
+  工具層目前只提供檔案操作與目錄摘要，不包含 shell execution；這是限制可用的操作種類，不代表檔案路徑授權或完整 security sandbox。
 
 - **Structured output + telemetry**
   `fix` 已具備較穩定的結構化輸出，同時保留 trace / telemetry，讓執行流程更容易觀察與 debug。
@@ -104,7 +105,7 @@ Dev Agent CLI 的目標，是在不過度設計的前提下，實作一個具備
 - 用簡單可讀的方式實作 agent-style developer workflow
 - 保留 command abstraction，而不是把所有行為都塞進單一 prompt
 - 讓 trace / telemetry 可以觀察 agent 執行過程
-- 用安全的 file tools 先建立基礎能力
+- 用範圍明確的 file tools 先建立基礎能力
 - 保持 MVP-first，避免過度設計
 
 ## 目前功能
