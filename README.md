@@ -1,5 +1,8 @@
 # Dev Agent CLI
 
+Project notes: [DevAgent CLI](https://wayturn.dev/projects/devagent)
+Author: [Wayturn Hung (洪偉騰)](https://wayturn.dev/about)
+
 Dev Agent CLI 是一個輕量、可檢視的 AI-assisted developer workflow / agent harness 學習實驗。
 它把 command、orchestration、tool、prompt 與 model call 的責任邊界攤開；trace 讓執行流程可檢視，測試與手動案例則驗證目前涵蓋的行為。這是學習與作品集專案，不是 production-ready 工具或完整 security sandbox。
 
@@ -13,7 +16,7 @@ Dev Agent CLI 是一個輕量、可檢視的 AI-assisted developer workflow / ag
 
 ```powershell
 python -m venv .venv
-.venv\Scripts\activate
+.venv\\Scripts\\activate
 pip install -e .
 ```
 
@@ -35,13 +38,13 @@ OPENAI_MODEL=gpt-4.1-mini
 ### 3. 先跑最有感的 `fix`
 
 ```powershell
-python -m dev_agent_cli.main fix .\test_cases\inputs\sample_service.py --goal "Reduce duplicated validation logic and improve readability" --trace
+python -m dev_agent_cli.main fix .\\test_cases\\inputs\\sample_service.py --goal "Reduce duplicated validation logic and improve readability" --trace
 ```
 
 或直接用 PowerShell 快捷腳本：
 
 ```powershell
-.\scripts\run_fix.ps1 -Trace
+.\\scripts\\run_fix.ps1 -Trace
 ```
 
 ## 為什麼做這個專案
@@ -130,9 +133,9 @@ Dev Agent CLI 用小而清楚的實作，探索 AI-assisted developer workflow �
 推薦指令：
 
 ```powershell
-.\scripts\run_fix.ps1 -Trace
-.\scripts\run_explain.ps1 -Trace
-.\scripts\run_gen_api.ps1 -Trace
+.\\scripts\\run_fix.ps1 -Trace
+.\\scripts\\run_explain.ps1 -Trace
+.\\scripts\\run_gen_api.ps1 -Trace
 ```
 
 ## 目前進度
@@ -202,9 +205,9 @@ $env:OPENAI_MODEL="gpt-4.1-mini"
 ## 常用指令
 
 ```powershell
-python -m dev_agent_cli.main explain .\test_cases\inputs\sample_service.py --trace
-python -m dev_agent_cli.main fix .\test_cases\inputs\sample_service.py --goal "Reduce duplicated validation logic and improve readability" --trace
-python -m dev_agent_cli.main gen-api .\test_cases\inputs\api_requirement.txt --goal "Design a clean RESTful backend API" --trace
+python -m dev_agent_cli.main explain .\\test_cases\\inputs\\sample_service.py --trace
+python -m dev_agent_cli.main fix .\\test_cases\\inputs\\sample_service.py --goal "Reduce duplicated validation logic and improve readability" --trace
+python -m dev_agent_cli.main gen-api .\\test_cases\\inputs\\api_requirement.txt --goal "Design a clean RESTful backend API" --trace
 ```
 
 ## 相關說明文件
